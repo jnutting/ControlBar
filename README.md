@@ -7,6 +7,8 @@
 
 A SwiftUI control group that stays accessible at an edge of its container. ControlBar lays out related controls horizontally or vertically, keeps them clear of safe areas, and lets people drag the group between supported edge positions.
 
+![Animated Control Bar example](Example/animated-control-bar.gif)
+
 ## Requirements
 
 - Swift 6.3 or later
