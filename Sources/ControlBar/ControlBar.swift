@@ -111,10 +111,17 @@ public struct ControlBar: View {
     /// The view that lays out the controls, applies safe-area clearance, and handles dragging.
     public var body: some View {
         GeometryReader { geometry in
+            let reservedRegionFrames = Self.reservedRegionFrames(from: geometry)
+            let edgeInsets = reservedRegionFrames.isEmpty
+            ? systemSafeAreaInsets.max(minimumEdgeInsets)
+            : minimumEdgeInsets
+
             ControlBarPlacementLayout(
                 position: position,
                 offset: offset,
-                dragStartOrigin: dragStartOrigin
+                dragStartOrigin: dragStartOrigin,
+                edgeInsets: edgeInsets,
+                reservedRegionFrames: reservedRegionFrames
             ) {
                 ControlBarContent(
                     items: items,
@@ -136,17 +143,21 @@ public struct ControlBar: View {
                 .modifier(
                     ConditionalDragGestureModifier(
                         isEnabled: draggable,
-                        gesture: dragGesture(containerSize: geometry.size)
+                        gesture: dragGesture(
+                            containerSize: geometry.size,
+                            edgeInsets: edgeInsets,
+                            reservedRegionFrames: reservedRegionFrames
+                        )
                     )
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .coordinateSpace(.named("controlsContainer"))
         }
-        .padding(systemSafeAreaInsets.max(minimumEdgeInsets))
         .background {
             SystemSafeAreaInsetsReader(insets: $systemSafeAreaInsets)
         }
+        .ignoresSafeArea()
     }
 
 }
@@ -273,4 +284,15 @@ private func previewExtraControlToggle(isOn: Binding<Bool>) -> some View {
         }
         .frame(width: 400, height: 400)
     }
+}
+
+#Preview("Device") {
+    @Previewable @State var showsExtraButton = true
+
+    ZStack {
+        previewBackground()
+        previewExtraControlToggle(isOn: $showsExtraButton)
+        previewControlBar(extraButton: showsExtraButton)
+    }
+    .ignoresSafeArea()
 }

@@ -7,7 +7,7 @@
 
 A SwiftUI view for grouping a set of controls or other small views together near the edge of its container. ControlBar lays out related items horizontally or vertically, keeps them clear of safe areas, and lets people drag the group between supported edge positions.
 
-It supports iOS and macOS, and automatically positions its content within the safe area on iOS.
+It supports iOS and macOS, and automatically positions its content within the safe area on iOS. On devices with screen-corner occlusion regions, such as iPhone Duo, it instead uses the edge-to-edge area and shifts the bar clear of the occluded corner.
 
 ![Animated Control Bar example](Example/animated-control-bar.gif)
 
