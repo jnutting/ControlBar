@@ -15,6 +15,7 @@ public struct ControlBar: View {
     let minimumEdgeInsets: EdgeInsets
     let draggable: Bool
     let itemOrder: (Position) -> ItemOrder
+    let barFrameBinding: Binding<CGRect?>?
 
     @State var internalPosition: Position
     @State var offset: CGSize = .zero
@@ -39,6 +40,7 @@ public struct ControlBar: View {
     ///   - minimumEdgeInsets: The minimum clearance to preserve between the bar and its container edges.
     ///   - draggable: Whether people can drag the bar to a different edge position.
     ///   - itemOrder: A function that determines the visual ordering of controls at each position.
+    ///   - barFrame: An optional binding that receives the control group's frame in the global coordinate space.
     public init(
         items: [ControlBarItem],
         position: Binding<Position>,
@@ -50,7 +52,8 @@ public struct ControlBar: View {
             trailing: 16
         ),
         draggable: Bool = true,
-        itemOrder: @escaping (Position) -> ItemOrder = { _ in .normal }
+        itemOrder: @escaping (Position) -> ItemOrder = { _ in .normal },
+        barFrame: Binding<CGRect?>? = nil
     ) {
         self.positionBinding = position
         self.items = items
@@ -58,6 +61,7 @@ public struct ControlBar: View {
         self.minimumEdgeInsets = minimumEdgeInsets
         self.draggable = draggable
         self.itemOrder = itemOrder
+        self.barFrameBinding = barFrame
         _internalPosition = State(initialValue: position.wrappedValue)
     }
 
@@ -70,6 +74,7 @@ public struct ControlBar: View {
     ///   - minimumEdgeInsets: The minimum clearance to preserve between the bar and its container edges.
     ///   - draggable: Whether people can drag the bar to a different edge position.
     ///   - itemOrder: A function that determines the visual ordering of controls at each position.
+    ///   - barFrame: An optional binding that receives the control group's frame in the global coordinate space.
     public init(
         items: [ControlBarItem],
         position: Position = .topEdgeLeading,
@@ -81,7 +86,8 @@ public struct ControlBar: View {
             trailing: 16
         ),
         draggable: Bool = true,
-        itemOrder: @escaping (Position) -> ItemOrder = { _ in .normal }
+        itemOrder: @escaping (Position) -> ItemOrder = { _ in .normal },
+        barFrame: Binding<CGRect?>? = nil
     ) {
         self.positionBinding = nil
         self.items = items
@@ -89,6 +95,7 @@ public struct ControlBar: View {
         self.minimumEdgeInsets = minimumEdgeInsets
         self.draggable = draggable
         self.itemOrder = itemOrder
+        self.barFrameBinding = barFrame
         _internalPosition = State(initialValue: position)
     }
 
@@ -131,6 +138,11 @@ public struct ControlBar: View {
                     proxy.size
                 } action: { newSize in
                     controlSize = newSize
+                }
+                .onGeometryChange(for: CGRect.self, of: { proxy in
+                    proxy.frame(in: .global)
+                }) { newFrame in
+                    barFrameBinding?.wrappedValue = newFrame
                 }
                 .dynamicTypeSize(.large)
                 .modifier(
