@@ -1,6 +1,7 @@
 # ControlBar
 
-[![Swift 6.3+](https://img.shields.io/badge/Swift-6.3%2B-F05138?logo=swift&logoColor=white)](https://www.swift.org)
+[![Xcode 27.1+](https://img.shields.io/badge/Xcode-27.1%2B-F05138?logo=swift&logoColor=white)](https://developer.apple.com/xcode/)
+[![Swift 6.4+](https://img.shields.io/badge/Swift-6.4%2B-F05138?logo=swift&logoColor=white)](https://www.swift.org)
 [![iOS 26+](https://img.shields.io/badge/iOS-26%2B-000000?logo=apple&logoColor=white)](https://developer.apple.com/ios/)
 [![macOS 26+](https://img.shields.io/badge/macOS-26%2B-000000?logo=apple&logoColor=white)](https://developer.apple.com/macos/)
 [![visionOS 26+](https://img.shields.io/badge/visionOS-26%2B-000000?logo=apple&logoColor=white)](https://developer.apple.com/visionos/)
@@ -13,7 +14,8 @@ It supports iOS and macOS, and automatically positions its content within the sa
 
 ## Requirements
 
-- Swift 6.3 or later
+- Xcode 27.1 or later required for v1.2.0 with iPhone Duo support; Previous versions may work with Xcode 26.
+- Swift 6.4 or later
 - iOS 26, macOS 26, or visionOS 26
 
 ## Installation
