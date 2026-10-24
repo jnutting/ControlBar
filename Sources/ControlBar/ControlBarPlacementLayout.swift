@@ -11,6 +11,8 @@ struct ControlBarPlacementLayout: Layout {
     let position: ControlBar.Position
     let offset: CGSize
     let dragStartOrigin: CGPoint?
+    let edgeInsets: EdgeInsets
+    let reservedRegionFrames: [CGRect]
 
     func sizeThatFits(
         proposal: ProposedViewSize,
@@ -32,7 +34,9 @@ struct ControlBarPlacementLayout: Layout {
         let origin = dragStartOrigin ?? ControlBar.controlOrigin(
             for: position,
             controlSize: controlSize,
-            containerSize: bounds.size
+            containerSize: bounds.size,
+            edgeInsets: edgeInsets,
+            reservedRegionFrames: reservedRegionFrames
         )
 
         subview.place(

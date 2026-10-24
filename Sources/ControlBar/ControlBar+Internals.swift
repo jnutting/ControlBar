@@ -7,14 +7,20 @@
 import SwiftUI
 
 extension ControlBar {
-    func dragGesture(containerSize: CGSize) -> some Gesture {
+    func dragGesture(
+        containerSize: CGSize,
+        edgeInsets: EdgeInsets,
+        reservedRegionFrames: [CGRect]
+    ) -> some Gesture {
         DragGesture(coordinateSpace: .named("controlsContainer"))
             .onChanged { gesture in
                 if dragStartOrigin == nil, controlSize.width > 0, controlSize.height > 0 {
                     let startOrigin = Self.controlOrigin(
                         for: position,
                         controlSize: controlSize,
-                        containerSize: containerSize
+                        containerSize: containerSize,
+                        edgeInsets: edgeInsets,
+                        reservedRegionFrames: reservedRegionFrames
                     )
                     let localStartLocation = CGPoint(
                         x: gesture.startLocation.x - startOrigin.x,
@@ -79,12 +85,16 @@ extension ControlBar {
                 let currentOrigin = dragStartOrigin ?? Self.controlOrigin(
                     for: position,
                     controlSize: controlSize,
-                    containerSize: containerSize
+                    containerSize: containerSize,
+                    edgeInsets: edgeInsets,
+                    reservedRegionFrames: reservedRegionFrames
                 )
                 let destinationOrigin = Self.controlOrigin(
                     for: newPosition,
                     controlSize: controlSize,
-                    containerSize: containerSize
+                    containerSize: containerSize,
+                    edgeInsets: edgeInsets,
+                    reservedRegionFrames: reservedRegionFrames
                 )
                 let distance = hypot(
                     destinationOrigin.x - currentOrigin.x - gesture.translation.width,
@@ -113,15 +123,59 @@ extension ControlBar {
     nonisolated static func controlOrigin(
         for position: Position,
         controlSize: CGSize,
-        containerSize: CGSize
+        containerSize: CGSize,
+        edgeInsets: EdgeInsets,
+        reservedRegionFrames: [CGRect]
     ) -> CGPoint {
-        let x = position.horizontalLocation == .leading
-        ? 0
-        : containerSize.width - controlSize.width
-        let y = position.verticalLocation == .top
-        ? 0
-        : containerSize.height - controlSize.height
-        return CGPoint(x: x, y: y)
+        let minimumX = edgeInsets.leading
+        let maximumX = max(minimumX, containerSize.width - edgeInsets.trailing - controlSize.width)
+        let minimumY = edgeInsets.top
+        let maximumY = max(minimumY, containerSize.height - edgeInsets.bottom - controlSize.height)
+        var origin = CGPoint(
+            x: position.horizontalLocation == .leading ? minimumX : maximumX,
+            y: position.verticalLocation == .top ? minimumY : maximumY
+        )
+        let controlFrame = CGRect(origin: origin, size: controlSize)
+        let intersectingRegions = reservedRegionFrames.filter(controlFrame.intersects)
+
+        switch position.orientation {
+        case .horizontal:
+            switch position.horizontalLocation {
+            case .leading:
+                if let regionEnd = intersectingRegions.map(\.maxX).max() {
+                    origin.x = min(max(origin.x, regionEnd), maximumX)
+                }
+            case .trailing:
+                if let regionStart = intersectingRegions.map(\.minX).min() {
+                    origin.x = max(min(origin.x, regionStart - controlSize.width), minimumX)
+                }
+            }
+        case .vertical:
+            switch position.verticalLocation {
+            case .top:
+                if let regionEnd = intersectingRegions.map(\.maxY).max() {
+                    origin.y = min(max(origin.y, regionEnd), maximumY)
+                }
+            case .bottom:
+                if let regionStart = intersectingRegions.map(\.minY).min() {
+                    origin.y = max(min(origin.y, regionStart - controlSize.height), minimumY)
+                }
+            }
+        }
+
+        return origin
+    }
+
+    static func reservedRegionFrames(from geometry: GeometryProxy) -> [CGRect] {
+#if os(iOS)
+        if #available(iOS 27.1, *) {
+            geometry.reservedRegions(kind: .occlusion).map(\.frame)
+        } else {
+            []
+        }
+#else
+        []
+#endif
     }
 
     static func newPosition(

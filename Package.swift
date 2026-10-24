@@ -18,6 +18,10 @@ let package = Package(
             name: "ControlBarExamples",
             dependencies: ["ControlBar"],
             path: "Example"
+        ),
+        .testTarget(
+            name: "ControlBarTests",
+            dependencies: ["ControlBar"]
         )
     ],
     swiftLanguageModes: [.v6]
