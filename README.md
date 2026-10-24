@@ -132,11 +132,33 @@ struct CanvasView: View {
 
 ## Additional configuration options
 
-If you want to the order of items to be reversed in some positions, provide an `itemOrder:` closure and use the provided `position` to decide whether it should be `.normal` or `.reversed`.
+Use `spacing:` to set the distance between adjacent items. It defaults to `8`.
+
+Use `minimumEdgeInsets:` to set the minimum clearance between the bar and its container edges. It defaults to `16` points on every edge.
+
+If you want the order of items to be reversed in some positions, provide an `itemOrder:` closure and use the provided `position` to return either `.normal` or `.reversed`. When only selected positions need an override, `ControlBar.itemOrder(_:default:)` creates the closure from a position-to-order dictionary:
+
+```swift
+itemOrder: ControlBar.itemOrder(
+    [.trailingEdgeTop: .reversed],
+    default: .normal
+)
+```
 
 If you want the bar to be fixed in its starting position, use `draggable: false`.
 
-It's easy to provide a different list of items at different moments, by maintaining your own array of `ControlBar.Item` instances that you pass to ControlBar in your view body; in this way you can conditionally remove items that don't belong at certain times. As long as each item has a unique, stable identifier throughout its usage, ControlBar will animate smoothly between different arrays of controls that you provide.
+Provide a `barFrame:` binding to observe the bar's frame in the global coordinate space:
+
+```swift
+@State private var controlBarFrame: CGRect?
+
+ControlBar(
+    items: items,
+    barFrame: $controlBarFrame
+)
+```
+
+It's easy to provide a different list of items at different moments by maintaining your own array of `ControlBarItem` instances and passing it to ControlBar in your view body. In this way, you can conditionally remove items that don't belong at certain times. As long as each item has a unique, stable identifier throughout its usage, ControlBar will animate smoothly between the different arrays of controls you provide.
 
 ## License
 
